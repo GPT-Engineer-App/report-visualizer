@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Heading, Grid, GridItem, VStack } from "@chakra-ui/react";
+import { Box, Heading, Grid, GridItem, VStack, Input } from "@chakra-ui/react";
 import { FaChartBar, FaChartPie, FaChartLine } from "react-icons/fa";
 import StatCard from "../components/StatCard";
 import ChartCard from "../components/ChartCard";
@@ -13,10 +13,28 @@ const Dashboard = () => {
   const [patientSatisfaction, setPatientSatisfaction] = useState(0);
   const [reports, setReports] = useState([]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    const storedReports = JSON.parse(localStorage.getItem("reports")) || [];
+    setReports(storedReports);
+    setReportCount(storedReports.length);
+  }, []);
 
   const handleAddReport = (e) => {
     e.preventDefault();
+    const form = e.target;
+    const patientName = form.elements.patientName.value;
+    const type = form.elements.type.value;
+    const newReport = {
+      patientName,
+      type,
+      date: new Date().toLocaleDateString(),
+      status: "In Progress",
+    };
+    const updatedReports = [...reports, newReport];
+    setReports(updatedReports);
+    setReportCount(updatedReports.length);
+    localStorage.setItem("reports", JSON.stringify(updatedReports));
+    form.reset();
   };
 
   return (
@@ -82,7 +100,10 @@ const Dashboard = () => {
 
       <VStack align="stretch" spacing={8}>
         <ReportTable reports={reports} />
-        <AddReportForm onSubmit={handleAddReport} />
+        <AddReportForm onSubmit={handleAddReport}>
+          <Input name="patientName" placeholder="Patient Name" />
+          <Input name="type" placeholder="Report Type" />
+        </AddReportForm>
       </VStack>
     </Box>
   );
